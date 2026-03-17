@@ -1,20 +1,34 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-  useMap,
-  useMapEvents,
-} from 'react-leaflet'
-import L from 'leaflet'
+import { useEffect, useState, useMemo } from 'react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { MosqueData } from '@/lib/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CheckCircle, MapPin, Clock, Navigation } from 'lucide-react'
+
+// Dynamically import react-leaflet components to avoid SSR issues
+const MapContainer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.MapContainer),
+  { ssr: false }
+)
+const TileLayer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.TileLayer),
+  { ssr: false }
+)
+const Marker = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Marker),
+  { ssr: false }
+)
+const Popup = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Popup),
+  { ssr: false }
+)
+
+// Import hooks directly since they're used in client components
+import { useMap, useMapEvents } from 'react-leaflet'
+import L from 'leaflet'
 
 // Custom mosque marker icon
 const mosqueIcon = new L.Icon({
@@ -87,7 +101,15 @@ export default function MosqueMap({
   selectedLocation,
   className = '',
 }: MosqueMapProps) {
+  const [isMounted, setIsMounted] = useState(false)
   const [mapCenter, setMapCenter] = useState<[number, number]>(center)
+
+  // Generate a stable key for the map based on initial center
+  const mapKey = useMemo(() => `map-${center[0]}-${center[1]}`, [center])
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   useEffect(() => {
     if (userLocation) {
@@ -95,8 +117,21 @@ export default function MosqueMap({
     }
   }, [userLocation])
 
+  // Don't render map on server
+  if (!isMounted) {
+    return (
+      <div 
+        className={`w-full h-full flex items-center justify-center bg-muted ${className}`}
+        style={{ minHeight: '400px' }}
+      >
+        <div className="text-muted-foreground">Loading map...</div>
+      </div>
+    )
+  }
+
   return (
     <MapContainer
+      key={mapKey}
       center={mapCenter}
       zoom={zoom}
       className={`w-full h-full ${className}`}

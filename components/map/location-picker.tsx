@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -25,6 +25,9 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
   const [searchQuery, setSearchQuery] = useState('')
   const [searching, setSearching] = useState(false)
   const [locating, setLocating] = useState(false)
+  
+  // Create a stable key that only changes on initial mount
+  const mapKey = useMemo(() => `picker-${Date.now()}`, [])
 
   const handleMapClick = (lat: number, lng: number) => {
     onChange({ lat, lng })
@@ -104,6 +107,7 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
 
       <div className="h-[300px] rounded-lg overflow-hidden border">
         <MosqueMap
+          key={mapKey}
           mosques={[]}
           center={value ? [value.lat, value.lng] : [21.4225, 39.8262]}
           zoom={value ? 15 : 3}
