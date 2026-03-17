@@ -1,17 +1,17 @@
 export interface JamatTimes {
-  fajr: string
-  dhuhr: string
-  asr: string
-  maghrib: string
-  isha: string
-  jummah: string
+  fajr: number // Unix timestamp in milliseconds
+  dhuhr: number
+  asr: number
+  maghrib: number
+  isha: number
+  jummah: number
 }
 
 export interface Facilities {
   femaleArea: boolean
   parking: boolean
-  wheelchair: boolean
-  wuduArea: boolean
+  wheelchairAccess: boolean
+  wuduFacilities: boolean
   airConditioned: boolean
 }
 

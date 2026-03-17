@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/mongodb'
 import Mosque from '@/lib/models/mosque'
+import { timeStringToTimestamp, isTimeString, isTimestamp } from '@/lib/time-utils'
 
 export async function GET(request: NextRequest) {
   try {
@@ -59,6 +60,16 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
 
+    // Convert time strings to timestamps if needed
+    const jamatTimes = {
+      fajr: isTimeString(body.jamatTimes.fajr) ? timeStringToTimestamp(body.jamatTimes.fajr) : body.jamatTimes.fajr,
+      dhuhr: isTimeString(body.jamatTimes.dhuhr) ? timeStringToTimestamp(body.jamatTimes.dhuhr) : body.jamatTimes.dhuhr,
+      asr: isTimeString(body.jamatTimes.asr) ? timeStringToTimestamp(body.jamatTimes.asr) : body.jamatTimes.asr,
+      maghrib: isTimeString(body.jamatTimes.maghrib) ? timeStringToTimestamp(body.jamatTimes.maghrib) : body.jamatTimes.maghrib,
+      isha: isTimeString(body.jamatTimes.isha) ? timeStringToTimestamp(body.jamatTimes.isha) : body.jamatTimes.isha,
+      jummah: isTimeString(body.jamatTimes.jummah) ? timeStringToTimestamp(body.jamatTimes.jummah) : body.jamatTimes.jummah,
+    }
+
     const mosque = new Mosque({
       name: body.name,
       address: body.address,
@@ -68,7 +79,7 @@ export async function POST(request: NextRequest) {
         type: 'Point',
         coordinates: [body.longitude, body.latitude],
       },
-      jamatTimes: body.jamatTimes,
+      jamatTimes,
       facilities: body.facilities,
       phone: body.phone,
       website: body.website,

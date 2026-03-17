@@ -5,6 +5,8 @@ import useSWR from 'swr'
 import { MosqueData } from '@/lib/types'
 import MosqueCard from '@/components/mosque-card'
 import SearchBar from '@/components/search-bar'
+import PrayerFilter, { PrayerFilters } from '@/components/prayer-filter'
+import { filterMosques } from '@/lib/filter-utils'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -25,6 +27,7 @@ export default function ListPage() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [sortBy, setSortBy] = useState<SortOption>('nearest')
   const [locating, setLocating] = useState(false)
+  const [filters, setFilters] = useState<PrayerFilters>({})
 
   // Build API URL
   const apiUrl = userLocation
@@ -57,21 +60,21 @@ export default function ListPage() {
     setUserLocation({ lat, lng })
   }
 
-  // Sort mosques
-  const sortedMosques = mosques
-    ? [...mosques].sort((a, b) => {
-        switch (sortBy) {
-          case 'nearest':
-            return (a.distance || Infinity) - (b.distance || Infinity)
-          case 'verified':
-            return b.verificationCount - a.verificationCount
-          case 'newest':
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          default:
-            return 0
-        }
-      })
-    : []
+  // Filter and sort mosques
+  const mosquesArray = Array.isArray(mosques) ? mosques : []
+  const filteredMosques = filterMosques(mosquesArray, filters)
+  const sortedMosques = [...filteredMosques].sort((a, b) => {
+    switch (sortBy) {
+      case 'nearest':
+        return (a.distance || Infinity) - (b.distance || Infinity)
+      case 'verified':
+        return b.verificationCount - a.verificationCount
+      case 'newest':
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      default:
+        return 0
+    }
+  })
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
@@ -89,7 +92,7 @@ export default function ListPage() {
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {locating ? (
             <Badge variant="outline" className="py-1">
               <Loader2 className="h-3 w-3 mr-1 animate-spin" />
@@ -106,14 +109,15 @@ export default function ListPage() {
               Showing all mosques
             </Badge>
           )}
-          {mosques && (
+          {sortedMosques.length > 0 && (
             <span className="text-sm text-muted-foreground">
-              {mosques.length} mosque{mosques.length !== 1 ? 's' : ''} found
+              {sortedMosques.length} mosque{sortedMosques.length !== 1 ? 's' : ''} found
             </span>
           )}
         </div>
 
         <div className="flex items-center gap-2">
+          <PrayerFilter filters={filters} onFiltersChange={setFilters} />
           <SortAsc className="h-4 w-4 text-muted-foreground" />
           <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
             <SelectTrigger className="w-[160px]">

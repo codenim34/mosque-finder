@@ -1,12 +1,12 @@
 import mongoose, { Schema, Document, Model } from 'mongoose'
 
 export interface IJamatTimes {
-  fajr: string
-  dhuhr: string
-  asr: string
-  maghrib: string
-  isha: string
-  jummah: string
+  fajr: number // Unix timestamp in milliseconds
+  dhuhr: number
+  asr: number
+  maghrib: number
+  isha: number
+  jummah: number
 }
 
 export interface IFacilities {
@@ -39,12 +39,12 @@ export interface IMosque extends Document {
 
 const JamatTimesSchema = new Schema<IJamatTimes>(
   {
-    fajr: { type: String, required: true },
-    dhuhr: { type: String, required: true },
-    asr: { type: String, required: true },
-    maghrib: { type: String, required: true },
-    isha: { type: String, required: true },
-    jummah: { type: String, required: true },
+    fajr: { type: Number, required: true }, // Unix timestamp in milliseconds
+    dhuhr: { type: Number, required: true },
+    asr: { type: Number, required: true },
+    maghrib: { type: Number, required: true },
+    isha: { type: Number, required: true },
+    jummah: { type: Number, required: true },
   },
   { _id: false }
 )
@@ -53,8 +53,8 @@ const FacilitiesSchema = new Schema<IFacilities>(
   {
     femaleArea: { type: Boolean, default: false },
     parking: { type: Boolean, default: false },
-    wheelchair: { type: Boolean, default: false },
-    wuduArea: { type: Boolean, default: false },
+    wheelchairAccess: { type: Boolean, default: false },
+    wuduFacilities: { type: Boolean, default: false },
     airConditioned: { type: Boolean, default: false },
   },
   { _id: false }

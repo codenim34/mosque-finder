@@ -42,8 +42,8 @@ interface FormData {
   facilities: {
     femaleArea: boolean
     parking: boolean
-    wheelchair: boolean
-    wuduArea: boolean
+    wheelchairAccess: boolean
+    wuduFacilities: boolean
     airConditioned: boolean
   }
 }
@@ -71,8 +71,8 @@ export default function AddMosquePage() {
     facilities: {
       femaleArea: false,
       parking: false,
-      wheelchair: false,
-      wuduArea: false,
+      wheelchairAccess: false,
+      wuduFacilities: false,
       airConditioned: false,
     },
   })
@@ -336,17 +336,17 @@ export default function AddMosquePage() {
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <Checkbox
-                  checked={formData.facilities.wheelchair}
-                  onCheckedChange={(checked) => updateFacility('wheelchair', !!checked)}
+                  checked={formData.facilities.wheelchairAccess}
+                  onCheckedChange={(checked) => updateFacility('wheelchairAccess', !!checked)}
                 />
                 <span>Wheelchair Accessible</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <Checkbox
-                  checked={formData.facilities.wuduArea}
-                  onCheckedChange={(checked) => updateFacility('wuduArea', !!checked)}
+                  checked={formData.facilities.wuduFacilities}
+                  onCheckedChange={(checked) => updateFacility('wuduFacilities', !!checked)}
                 />
-                <span>Wudu Area</span>
+                <span>Wudu Facilities</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <Checkbox
