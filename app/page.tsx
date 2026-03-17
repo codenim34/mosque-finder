@@ -6,6 +6,8 @@ import useSWR from 'swr'
 import { MosqueData } from '@/lib/types'
 import SearchBar from '@/components/search-bar'
 import MosqueCard from '@/components/mosque-card'
+import PrayerFilter, { PrayerFilters } from '@/components/prayer-filter'
+import { filterMosques } from '@/lib/filter-utils'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -26,6 +28,7 @@ export default function HomePage() {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null)
   const [showSidebar, setShowSidebar] = useState(true)
   const [locating, setLocating] = useState(false)
+  const [filters, setFilters] = useState<PrayerFilters>({})
 
   // Build API URL based on user location
   const apiUrl = userLocation
@@ -35,7 +38,8 @@ export default function HomePage() {
   const { data: mosquesData, error, isLoading } = useSWR<MosqueData[]>(apiUrl, fetcher)
   
   // Ensure mosques is always an array
-  const mosques = Array.isArray(mosquesData) ? mosquesData : []
+  const allMosques = Array.isArray(mosquesData) ? mosquesData : []
+  const mosques = filterMosques(allMosques, filters)
 
   // Try to get user location on mount
   useEffect(() => {
@@ -79,23 +83,26 @@ export default function HomePage() {
         >
           {showSidebar && (
             <div className="h-full flex flex-col">
-              <div className="p-4 border-b flex items-center justify-between">
-                <div>
-                  <h2 className="font-semibold">Nearby Mosques</h2>
-                  <p className="text-sm text-muted-foreground">
-                    {isLoading
-                      ? 'Loading...'
-                      : `${mosques.length} mosques found`}
-                  </p>
+              <div className="p-4 border-b">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h2 className="font-semibold">Nearby Mosques</h2>
+                    <p className="text-sm text-muted-foreground">
+                      {isLoading
+                        ? 'Loading...'
+                        : `${mosques.length} mosque${mosques.length !== 1 ? 's' : ''} found`}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="md:hidden"
+                    onClick={() => setShowSidebar(false)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="md:hidden"
-                  onClick={() => setShowSidebar(false)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+                <PrayerFilter filters={filters} onFiltersChange={setFilters} />
               </div>
 
               <ScrollArea className="flex-1 p-4">

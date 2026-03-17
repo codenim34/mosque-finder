@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { MosqueData } from '@/lib/types'
+import { getNextPrayerTime } from '@/lib/filter-utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -23,15 +24,25 @@ interface MosqueCardProps {
 }
 
 export default function MosqueCard({ mosque, showDistance }: MosqueCardProps) {
+  const nextPrayer = getNextPrayerTime(mosque)
+
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start justify-between gap-2 flex-wrap">
           <CardTitle className="text-lg leading-tight">{mosque.name}</CardTitle>
-          <Badge variant="secondary" className="shrink-0">
-            <CheckCircle className="h-3 w-3 mr-1" />
-            {mosque.verificationCount}
-          </Badge>
+          <div className="flex gap-1 flex-wrap justify-end">
+            {nextPrayer && (
+              <Badge variant="default" className="shrink-0 bg-primary">
+                <Clock className="h-3 w-3 mr-1" />
+                {nextPrayer.name} {nextPrayer.time}
+              </Badge>
+            )}
+            <Badge variant="secondary" className="shrink-0">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              {mosque.verificationCount}
+            </Badge>
+          </div>
         </div>
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
           <MapPin className="h-3 w-3 shrink-0" />
