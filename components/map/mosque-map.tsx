@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { MosqueData } from '@/lib/types'
+import { defaultLocale, t } from '@/lib/i18n'
 
 interface MosqueMapProps {
   mosques: MosqueData[]
@@ -28,6 +29,15 @@ export default function MosqueMap({
   const userMarkerRef = useRef<L.Marker | null>(null)
   const selectedMarkerRef = useRef<L.Marker | null>(null)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [locale, setLocale] = useState(defaultLocale)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const savedLocale = window.localStorage.getItem('mosque-finder-locale')
+    if (savedLocale === 'bn' || savedLocale === 'en') {
+      setLocale(savedLocale)
+    }
+  }, [])
 
   // Initialize map
   useEffect(() => {
@@ -110,7 +120,7 @@ export default function MosqueMap({
 
         userMarkerRef.current = L.marker(userLocation, { icon: userIcon })
           .addTo(mapRef.current!)
-          .bindPopup('<div class="text-center font-medium">Your Location</div>')
+          .bindPopup(`<div class="text-center font-medium">${t(locale, 'yourLocation')}</div>`)
       }
     })
   }, [userLocation, isLoaded])
@@ -140,7 +150,7 @@ export default function MosqueMap({
 
         selectedMarkerRef.current = L.marker(selectedLocation, { icon: selectedIcon })
           .addTo(mapRef.current!)
-          .bindPopup('<div class="text-center font-medium">Selected Location</div>')
+          .bindPopup(`<div class="text-center font-medium">${t(locale, 'selectedLocation')}</div>`)
         
         mapRef.current!.setView(selectedLocation, 15)
       }
@@ -177,7 +187,7 @@ export default function MosqueMap({
         ).addTo(mapRef.current!)
 
         const distanceText = mosque.distance 
-          ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-xs">${(mosque.distance / 1000).toFixed(1)} km</span>` 
+          ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-xs">${t(locale, 'kmAway', { distance: (mosque.distance / 1000).toFixed(1) })}</span>` 
           : ''
 
         // Format times from timestamps
@@ -187,12 +197,12 @@ export default function MosqueMap({
         }
 
         marker.bindPopup(`
-          <div class="min-w-[200px] p-1">
+          <div class="min-w-50 p-1">
             <h3 class="font-semibold text-base mb-1">${mosque.name}</h3>
             <p class="text-sm text-gray-600 mb-2">${mosque.address}</p>
             <div class="flex items-center gap-2 mb-2">
               <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-xs">
-                ${mosque.verificationCount} verified
+                ${t(locale, 'verifiedCount', { count: mosque.verificationCount })}
               </span>
               ${distanceText}
             </div>
@@ -201,7 +211,7 @@ export default function MosqueMap({
               <span class="font-medium">Dhuhr:</span> ${formatTime(mosque.jamatTimes.dhuhr)}
             </div>
             <a href="/mosque/${mosque._id}" class="block w-full text-center bg-green-700 hover:bg-green-800 text-white py-1.5 px-3 rounded text-sm">
-              View Details
+              ${t(locale, 'mapPopupViewDetails')}
             </a>
           </div>
         `)
@@ -220,7 +230,7 @@ export default function MosqueMap({
       />
       {!isLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-muted">
-          <div className="text-muted-foreground">Loading map...</div>
+          <div className="text-muted-foreground">{t(locale, 'loadingMap')}</div>
         </div>
       )}
     </div>

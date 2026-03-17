@@ -12,11 +12,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Loader2, MapPin, Clock, Building2, Phone, Globe, FileText } from 'lucide-react'
+import { useLanguage } from '@/components/language-provider'
 
 const LocationPicker = dynamic(() => import('@/components/map/location-picker'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[300px] bg-muted animate-pulse rounded-lg flex items-center justify-center">
+    <div className="w-full h-75 bg-muted animate-pulse rounded-lg flex items-center justify-center">
       <MapPin className="h-8 w-8 text-muted-foreground" />
     </div>
   ),
@@ -50,6 +51,8 @@ interface FormData {
 
 export default function AddMosquePage() {
   const router = useRouter()
+  const { translate } = useLanguage()
+  const bi = (bn: string, en: string) => `${bn} (${en})`
   const [submitting, setSubmitting] = useState(false)
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -81,18 +84,18 @@ export default function AddMosquePage() {
     e.preventDefault()
 
     if (!formData.location) {
-      toast.error('Please select a location on the map')
+      toast.error(translate('selectLocationMap'))
       return
     }
 
     if (!formData.name || !formData.address || !formData.city || !formData.country) {
-      toast.error('Please fill in all required fields')
+      toast.error(translate('fillRequiredFields'))
       return
     }
 
     const times = formData.jamatTimes
     if (!times.fajr || !times.dhuhr || !times.asr || !times.maghrib || !times.isha || !times.jummah) {
-      toast.error('Please fill in all prayer times')
+      toast.error(translate('fillPrayerTimes'))
       return
     }
 
@@ -124,11 +127,11 @@ export default function AddMosquePage() {
       }
 
       const mosque = await response.json()
-      toast.success('Mosque added successfully!')
+      toast.success(translate('mosqueAddedSuccess'))
       router.push(`/mosque/${mosque._id}`)
     } catch (error) {
       console.error('Error adding mosque:', error)
-      toast.error('Failed to add mosque. Please try again.')
+      toast.error(translate('failedAddMosque'))
     } finally {
       setSubmitting(false)
     }
@@ -154,10 +157,10 @@ export default function AddMosquePage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-balance">Add a Mosque</h1>
+      <div className="mb-8 rounded-xl border bg-linear-to-br from-card via-card to-secondary/25 p-6 shadow-sm">
+        <h1 className="text-3xl font-bold text-balance">{bi('মসজিদ যোগ করুন', 'Add Mosque')}</h1>
         <p className="text-muted-foreground mt-2">
-          Help the community by adding mosque information. Others can verify the details you provide.
+          {bi('কমিউনিটির জন্য নির্ভরযোগ্য তথ্য যোগ করুন।', 'Add reliable mosque information for the community.')}
         </p>
       </div>
 
@@ -167,16 +170,16 @@ export default function AddMosquePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
-              Basic Information
+              {bi('মৌলিক তথ্য', 'Basic Information')}
             </CardTitle>
-            <CardDescription>Enter the mosque&apos;s name and location details</CardDescription>
+            <CardDescription>{bi('মসজিদের নাম ও ঠিকানা দিন', 'Provide mosque name and address')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Mosque Name *</Label>
+              <Label htmlFor="name">{bi('মসজিদের নাম', 'Mosque Name')} *</Label>
               <Input
                 id="name"
-                placeholder="e.g., Al-Rahman Mosque"
+                placeholder="যেমন: আল-রহমান জামে মসজিদ / e.g., Al-Rahman Jame Masjid"
                 value={formData.name}
                 onChange={(e) => updateField('name', e.target.value)}
                 required
@@ -184,32 +187,32 @@ export default function AddMosquePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="address">Street Address *</Label>
+              <Label htmlFor="address">{bi('রাস্তার ঠিকানা', 'Street Address')} *</Label>
               <Input
                 id="address"
-                placeholder="e.g., 123 Main Street"
+                placeholder="যেমন: ১২৩ মেইন রোড / e.g., 123 Main Road"
                 value={formData.address}
                 onChange={(e) => updateField('address', e.target.value)}
                 required
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="city">City *</Label>
+                <Label htmlFor="city">{bi('শহর', 'City')} *</Label>
                 <Input
                   id="city"
-                  placeholder="e.g., London"
+                  placeholder="যেমন: ঢাকা / e.g., Dhaka"
                   value={formData.city}
                   onChange={(e) => updateField('city', e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="country">Country *</Label>
+                <Label htmlFor="country">{bi('দেশ', 'Country')} *</Label>
                 <Input
                   id="country"
-                  placeholder="e.g., United Kingdom"
+                  placeholder="যেমন: বাংলাদেশ / e.g., Bangladesh"
                   value={formData.country}
                   onChange={(e) => updateField('country', e.target.value)}
                   required
@@ -224,9 +227,9 @@ export default function AddMosquePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="h-5 w-5" />
-              Location on Map *
+              {bi('মানচিত্রে অবস্থান', 'Location on Map')} *
             </CardTitle>
-            <CardDescription>Click on the map or search to set the exact location</CardDescription>
+            <CardDescription>{bi('ম্যাপে পিন দিন বা সার্চ করুন', 'Pin on map or search location')}</CardDescription>
           </CardHeader>
           <CardContent>
             <LocationPicker
@@ -241,67 +244,79 @@ export default function AddMosquePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5" />
-              Jamat Times *
+              {bi('জামাতের সময়', 'Jamat Times')} *
             </CardTitle>
-            <CardDescription>Enter the congregation prayer times (use 24-hour or 12-hour format)</CardDescription>
+            <CardDescription>{bi('বিল্ট-ইন টাইম সিলেক্টর ব্যবহার করুন', 'Use built-in time selector (English HH:MM)')}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="fajr">Fajr</Label>
+                <Label htmlFor="fajr">ফজর (Fajr)</Label>
                 <Input
                   id="fajr"
-                  placeholder="e.g., 5:30 AM"
+                  type="time"
+                  lang="en"
+                  step={60}
                   value={formData.jamatTimes.fajr}
                   onChange={(e) => updateJamatTime('fajr', e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="dhuhr">Dhuhr</Label>
+                <Label htmlFor="dhuhr">যোহর (Dhuhr)</Label>
                 <Input
                   id="dhuhr"
-                  placeholder="e.g., 1:30 PM"
+                  type="time"
+                  lang="en"
+                  step={60}
                   value={formData.jamatTimes.dhuhr}
                   onChange={(e) => updateJamatTime('dhuhr', e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="asr">Asr</Label>
+                <Label htmlFor="asr">আসর (Asr)</Label>
                 <Input
                   id="asr"
-                  placeholder="e.g., 5:00 PM"
+                  type="time"
+                  lang="en"
+                  step={60}
                   value={formData.jamatTimes.asr}
                   onChange={(e) => updateJamatTime('asr', e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="maghrib">Maghrib</Label>
+                <Label htmlFor="maghrib">মাগরিব (Maghrib)</Label>
                 <Input
                   id="maghrib"
-                  placeholder="e.g., 7:30 PM"
+                  type="time"
+                  lang="en"
+                  step={60}
                   value={formData.jamatTimes.maghrib}
                   onChange={(e) => updateJamatTime('maghrib', e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="isha">Isha</Label>
+                <Label htmlFor="isha">এশা (Isha)</Label>
                 <Input
                   id="isha"
-                  placeholder="e.g., 9:00 PM"
+                  type="time"
+                  lang="en"
+                  step={60}
                   value={formData.jamatTimes.isha}
                   onChange={(e) => updateJamatTime('isha', e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="jummah" className="text-primary font-medium">Jummah (Friday)</Label>
+                <Label htmlFor="jummah" className="text-primary font-medium">জুমা (Jummah - Friday)</Label>
                 <Input
                   id="jummah"
-                  placeholder="e.g., 1:15 PM"
+                  type="time"
+                  lang="en"
+                  step={60}
                   value={formData.jamatTimes.jummah}
                   onChange={(e) => updateJamatTime('jummah', e.target.value)}
                   required
@@ -309,51 +324,54 @@ export default function AddMosquePage() {
                 />
               </div>
             </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              {bi('সময় ফরম্যাট: HH:MM (ইংরেজি)', 'Time format: HH:MM (English)')}
+            </p>
           </CardContent>
         </Card>
 
         {/* Facilities */}
         <Card>
           <CardHeader>
-            <CardTitle>Facilities</CardTitle>
-            <CardDescription>Select the facilities available at this mosque</CardDescription>
+            <CardTitle>{bi('সুবিধাসমূহ', 'Facilities')}</CardTitle>
+            <CardDescription>{bi('যে সুবিধাগুলো আছে সেগুলো নির্বাচন করুন', 'Select available facilities')}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <label className="flex items-center gap-3 cursor-pointer">
                 <Checkbox
                   checked={formData.facilities.femaleArea}
                   onCheckedChange={(checked) => updateFacility('femaleArea', !!checked)}
                 />
-                <span>Female Prayer Area</span>
+                <span>{translate('femalePrayerArea')}</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <Checkbox
                   checked={formData.facilities.parking}
                   onCheckedChange={(checked) => updateFacility('parking', !!checked)}
                 />
-                <span>Parking Available</span>
+                <span>{translate('parkingAvailable')}</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <Checkbox
                   checked={formData.facilities.wheelchairAccess}
                   onCheckedChange={(checked) => updateFacility('wheelchairAccess', !!checked)}
                 />
-                <span>Wheelchair Accessible</span>
+                <span>{translate('wheelchairAccessible')}</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <Checkbox
                   checked={formData.facilities.wuduFacilities}
                   onCheckedChange={(checked) => updateFacility('wuduFacilities', !!checked)}
                 />
-                <span>Wudu Facilities</span>
+                <span>{translate('wuduFacilities')}</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <Checkbox
                   checked={formData.facilities.airConditioned}
                   onCheckedChange={(checked) => updateFacility('airConditioned', !!checked)}
                 />
-                <span>Air Conditioned</span>
+                <span>{translate('airConditioned')}</span>
               </label>
             </div>
           </CardContent>
@@ -362,19 +380,19 @@ export default function AddMosquePage() {
         {/* Additional Info */}
         <Card>
           <CardHeader>
-            <CardTitle>Additional Information (Optional)</CardTitle>
-            <CardDescription>Add contact details and description</CardDescription>
+            <CardTitle>{bi('অতিরিক্ত তথ্য (ঐচ্ছিক)', 'Additional Information (Optional)')}</CardTitle>
+            <CardDescription>{bi('যোগাযোগ ও বর্ণনা দিন', 'Add contact details and description')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="phone" className="flex items-center gap-2">
                   <Phone className="h-4 w-4" />
-                  Phone
+                  {bi('ফোন', 'Phone')}
                 </Label>
                 <Input
                   id="phone"
-                  placeholder="e.g., +44 123 456 7890"
+                  placeholder="যেমন: +8801XXXXXXXXX"
                   value={formData.phone}
                   onChange={(e) => updateField('phone', e.target.value)}
                 />
@@ -382,7 +400,7 @@ export default function AddMosquePage() {
               <div className="space-y-2">
                 <Label htmlFor="website" className="flex items-center gap-2">
                   <Globe className="h-4 w-4" />
-                  Website
+                  {bi('ওয়েবসাইট', 'Website')}
                 </Label>
                 <Input
                   id="website"
@@ -396,11 +414,11 @@ export default function AddMosquePage() {
             <div className="space-y-2">
               <Label htmlFor="description" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
-                Description
+                {bi('বর্ণনা', 'Description')}
               </Label>
               <Textarea
                 id="description"
-                placeholder="Any additional information about the mosque..."
+                placeholder="মসজিদ সম্পর্কে অতিরিক্ত তথ্য লিখুন..."
                 value={formData.description}
                 onChange={(e) => updateField('description', e.target.value)}
                 rows={3}
@@ -411,23 +429,23 @@ export default function AddMosquePage() {
 
         <Separator />
 
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           <Button
             type="button"
             variant="outline"
             onClick={() => router.back()}
             className="flex-1"
           >
-            Cancel
+            {translate('cancel')}
           </Button>
           <Button type="submit" disabled={submitting} className="flex-1">
             {submitting ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Adding Mosque...
+                {translate('addingMosque')}
               </>
             ) : (
-              'Add Mosque'
+              translate('addMosqueSubmit')
             )}
           </Button>
         </div>

@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search, Crosshair, Loader2 } from 'lucide-react'
+import { useLanguage } from '@/components/language-provider'
 
 interface SearchBarProps {
   onLocationFound?: (lat: number, lng: number) => void
@@ -15,7 +15,7 @@ export default function SearchBar({ onLocationFound, className }: SearchBarProps
   const [query, setQuery] = useState('')
   const [searching, setSearching] = useState(false)
   const [locating, setLocating] = useState(false)
-  const router = useRouter()
+  const { translate } = useLanguage()
 
   const handleSearch = async () => {
     if (!query.trim()) return
@@ -37,7 +37,7 @@ export default function SearchBar({ onLocationFound, className }: SearchBarProps
 
   const handleLocateMe = () => {
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser')
+      alert(translate('geolocationUnsupported'))
       return
     }
 
@@ -51,7 +51,7 @@ export default function SearchBar({ onLocationFound, className }: SearchBarProps
       },
       (error) => {
         console.error('Geolocation error:', error)
-        alert('Unable to get your location. Please search manually.')
+        alert(translate('geolocationFailed'))
         setLocating(false)
       }
     )
@@ -62,7 +62,7 @@ export default function SearchBar({ onLocationFound, className }: SearchBarProps
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search by city, address, or mosque name..."
+          placeholder={translate('searchPlaceholder')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -77,7 +77,7 @@ export default function SearchBar({ onLocationFound, className }: SearchBarProps
         {searching ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
-          'Search'
+          translate('search')
         )}
       </Button>
       <Button
@@ -85,7 +85,7 @@ export default function SearchBar({ onLocationFound, className }: SearchBarProps
         onClick={handleLocateMe}
         disabled={locating}
         className="shrink-0"
-        title="Use my location"
+        title={translate('useMyLocation')}
       >
         {locating ? (
           <Loader2 className="h-4 w-4 animate-spin" />

@@ -6,6 +6,8 @@ import Link from 'next/link'
 import useSWR, { mutate } from 'swr'
 import { MosqueData } from '@/lib/types'
 import { toast } from 'sonner'
+import { useLanguage } from '@/components/language-provider'
+import { timestampToTimeString } from '@/lib/time-utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -32,7 +34,7 @@ import {
 const MosqueMap = dynamic(() => import('@/components/map/mosque-map'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[300px] bg-muted animate-pulse rounded-lg flex items-center justify-center">
+    <div className="w-full h-75 bg-muted animate-pulse rounded-lg flex items-center justify-center">
       <MapPin className="h-8 w-8 text-muted-foreground" />
     </div>
   ),
@@ -47,6 +49,7 @@ export default function MosqueDetailPage({
 }) {
   const { id } = use(params)
   const [verifying, setVerifying] = useState(false)
+  const { translate } = useLanguage()
 
   const { data: mosque, error, isLoading } = useSWR<MosqueData>(
     `/api/mosques/${id}`,
@@ -63,16 +66,16 @@ export default function MosqueDetailPage({
       const data = await response.json()
 
       if (data.alreadyVerified) {
-        toast.info('You have already verified this mosque')
+        toast.info(translate('alreadyVerified'))
       } else if (response.ok) {
-        toast.success('Thank you for verifying this mosque!')
+        toast.success(translate('verifyThanks'))
         mutate(`/api/mosques/${id}`)
       } else {
         throw new Error(data.error)
       }
     } catch (error) {
       console.error('Verification error:', error)
-      toast.error('Failed to verify. Please try again.')
+      toast.error(translate('verifyFailed'))
     } finally {
       setVerifying(false)
     }
@@ -91,7 +94,7 @@ export default function MosqueDetailPage({
       }
     } else {
       await navigator.clipboard.writeText(window.location.href)
-      toast.success('Link copied to clipboard!')
+      toast.success(translate('copiedLink'))
     }
   }
 
@@ -111,7 +114,7 @@ export default function MosqueDetailPage({
         <Skeleton className="h-8 w-48 mb-4" />
         <Skeleton className="h-6 w-64 mb-8" />
         <div className="grid md:grid-cols-2 gap-6">
-          <Skeleton className="h-[300px]" />
+          <Skeleton className="h-75" />
           <div className="space-y-4">
             <Skeleton className="h-32" />
             <Skeleton className="h-32" />
@@ -124,14 +127,14 @@ export default function MosqueDetailPage({
   if (error || !mosque) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl text-center">
-        <h1 className="text-2xl font-bold mb-4">Mosque Not Found</h1>
+        <h1 className="text-2xl font-bold mb-4">{translate('mosqueNotFound')}</h1>
         <p className="text-muted-foreground mb-6">
-          The mosque you&apos;re looking for doesn&apos;t exist or has been removed.
+          {translate('mosqueNotFoundDesc')}
         </p>
-        <Link href="/">
+        <Link href="/map">
           <Button>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Map
+            {translate('backToMap')}
           </Button>
         </Link>
       </div>
@@ -139,11 +142,11 @@ export default function MosqueDetailPage({
   }
 
   const facilities = [
-    { key: 'femaleArea', label: 'Female Prayer Area', icon: Users },
-    { key: 'parking', label: 'Parking Available', icon: Car },
-    { key: 'wheelchair', label: 'Wheelchair Accessible', icon: Accessibility },
-    { key: 'wuduArea', label: 'Wudu Area', icon: Droplets },
-    { key: 'airConditioned', label: 'Air Conditioned', icon: Wind },
+    { key: 'femaleArea', label: translate('femalePrayerArea'), icon: Users },
+    { key: 'parking', label: translate('parkingAvailable'), icon: Car },
+    { key: 'wheelchairAccess', label: translate('wheelchairAccessible'), icon: Accessibility },
+    { key: 'wuduFacilities', label: translate('wuduFacilities'), icon: Droplets },
+    { key: 'airConditioned', label: translate('airConditioned'), icon: Wind },
   ] as const
 
   const prayerTimes = [
@@ -158,9 +161,9 @@ export default function MosqueDetailPage({
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       {/* Back button */}
-      <Link href="/" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6">
+      <Link href="/map" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6">
         <ArrowLeft className="h-4 w-4 mr-2" />
-        Back to Map
+        {translate('backToMap')}
       </Link>
 
       {/* Header */}
@@ -175,7 +178,7 @@ export default function MosqueDetailPage({
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="text-sm py-1 px-3">
             <CheckCircle className="h-4 w-4 mr-1" />
-            {mosque.verificationCount} verified
+            {translate('verifiedCount', { count: mosque.verificationCount })}
           </Badge>
         </div>
       </div>
@@ -184,7 +187,7 @@ export default function MosqueDetailPage({
         {/* Map */}
         <div className="space-y-4">
           <Card className="overflow-hidden">
-            <div className="h-[300px]">
+            <div className="h-75">
               <MosqueMap
                 mosques={[mosque]}
                 center={[
@@ -200,7 +203,7 @@ export default function MosqueDetailPage({
           <div className="flex gap-2">
             <Button onClick={handleGetDirections} className="flex-1">
               <Navigation className="h-4 w-4 mr-2" />
-              Get Directions
+              {translate('getDirections')}
             </Button>
             <Button variant="outline" onClick={handleShare}>
               <Share2 className="h-4 w-4" />
@@ -211,7 +214,7 @@ export default function MosqueDetailPage({
           <Card>
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground mb-4">
-                Have you prayed at this mosque? Verify the information is correct to help others.
+                {translate('verifyHint')}
               </p>
               <Button
                 onClick={handleVerify}
@@ -222,12 +225,12 @@ export default function MosqueDetailPage({
                 {verifying ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Verifying...
+                    {translate('verifying')}
                   </>
                 ) : (
                   <>
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    Verify This Mosque
+                    {translate('verifyThisMosque')}
                   </>
                 )}
               </Button>
@@ -242,7 +245,7 @@ export default function MosqueDetailPage({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5" />
-                Jamat Times
+                {translate('jamatTimes')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -258,7 +261,7 @@ export default function MosqueDetailPage({
                       {label}
                     </p>
                     <p className={`text-lg font-semibold ${highlight ? 'text-primary' : ''}`}>
-                      {mosque.jamatTimes[key]}
+                      {timestampToTimeString(mosque.jamatTimes[key])}
                     </p>
                   </div>
                 ))}
@@ -269,7 +272,7 @@ export default function MosqueDetailPage({
           {/* Facilities */}
           <Card>
             <CardHeader>
-              <CardTitle>Facilities</CardTitle>
+              <CardTitle>{translate('facilities')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
@@ -294,7 +297,7 @@ export default function MosqueDetailPage({
           {(mosque.phone || mosque.website || mosque.description) && (
             <Card>
               <CardHeader>
-                <CardTitle>Additional Information</CardTitle>
+                <CardTitle>{translate('additionalInformation')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {mosque.phone && (
@@ -314,7 +317,7 @@ export default function MosqueDetailPage({
                     className="flex items-center gap-2 text-primary hover:underline"
                   >
                     <Globe className="h-4 w-4" />
-                    Visit Website
+                    {translate('visitWebsite')}
                     <ExternalLink className="h-3 w-3" />
                   </a>
                 )}

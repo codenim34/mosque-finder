@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Filter, X } from 'lucide-react'
+import { useLanguage } from '@/components/language-provider'
 
 export interface PrayerFilters {
   upcomingPrayer?: 'fajr' | 'dhuhr' | 'asr' | 'maghrib' | 'isha' | 'jummah' | 'any'
@@ -33,18 +34,19 @@ const prayerTimes = [
   { value: 'asr', label: 'Asr', icon: '⛅' },
   { value: 'maghrib', label: 'Maghrib', icon: '🌅' },
   { value: 'isha', label: 'Isha', icon: '🌙' },
-  { value: 'jummah', label: 'Jummah (Fri)', icon: '📅' },
-]
-
-const facilities = [
-  { id: 'femaleArea', label: 'Female Prayer Area', checked: false },
-  { id: 'wheelchairAccess', label: 'Wheelchair Accessible', checked: false },
-  { id: 'parking', label: 'Parking Available', checked: false },
-  { id: 'wuduFacilities', label: 'Wudu Facilities', checked: false },
+  { value: 'jummah', label: 'Jummah', icon: '📅' },
 ]
 
 export default function PrayerFilter({ filters, onFiltersChange }: PrayerFilterProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const { translate } = useLanguage()
+
+  const facilities = [
+    { id: 'femaleArea', label: translate('femalePrayerArea') },
+    { id: 'wheelchairAccess', label: translate('wheelchairAccessible') },
+    { id: 'parking', label: translate('parkingAvailable') },
+    { id: 'wuduFacilities', label: translate('wuduFacilities') },
+  ]
 
   const hasActiveFilters = Object.values(filters).some((v) => v === true || (v && v !== 'any'))
 
@@ -76,7 +78,7 @@ export default function PrayerFilter({ filters, onFiltersChange }: PrayerFilterP
         className="gap-2"
       >
         <Filter className="h-4 w-4" />
-        Filters
+        {translate('filter')}
         {hasActiveFilters && (
           <Badge variant="secondary" className="ml-1 px-1.5">
             {Object.values(filters).filter((v) => v === true || (v && v !== 'any')).length}
@@ -87,7 +89,7 @@ export default function PrayerFilter({ filters, onFiltersChange }: PrayerFilterP
       {isOpen && (
         <div className="absolute right-0 top-full mt-2 w-80 bg-card border rounded-lg shadow-lg p-4 z-50">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-semibold">Filter Mosques</h3>
+            <h3 className="font-semibold">{translate('filterMosques')}</h3>
             <button
               onClick={() => setIsOpen(false)}
               className="text-muted-foreground hover:text-foreground"
@@ -98,7 +100,7 @@ export default function PrayerFilter({ filters, onFiltersChange }: PrayerFilterP
 
           {/* Prayer Time Filter */}
           <div className="mb-6">
-            <label className="text-sm font-medium mb-3 block">Upcoming Prayer Times</label>
+            <label className="text-sm font-medium mb-3 block">{translate('upcomingPrayer')}</label>
             <Select
               value={filters.upcomingPrayer || 'any'}
               onValueChange={handlePrayerChange}
@@ -107,7 +109,7 @@ export default function PrayerFilter({ filters, onFiltersChange }: PrayerFilterP
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="any">Show All Times</SelectItem>
+                <SelectItem value="any">{translate('showAllTimes')}</SelectItem>
                 {prayerTimes.map((prayer) => (
                   <SelectItem key={prayer.value} value={prayer.value}>
                     {prayer.icon} {prayer.label}
@@ -116,13 +118,13 @@ export default function PrayerFilter({ filters, onFiltersChange }: PrayerFilterP
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground mt-2">
-              Shows only mosques with upcoming prayer times in the next 24 hours
+              {translate('upcomingPrayerHint')}
             </p>
           </div>
 
           {/* Facilities Filter */}
           <div className="mb-6">
-            <label className="text-sm font-medium mb-3 block">Facilities</label>
+            <label className="text-sm font-medium mb-3 block">{translate('facilities')}</label>
             <div className="space-y-3">
               {facilities.map((facility) => (
                 <div key={facility.id} className="flex items-center gap-2">
@@ -151,7 +153,7 @@ export default function PrayerFilter({ filters, onFiltersChange }: PrayerFilterP
               onClick={handleClearFilters}
               className="w-full text-muted-foreground"
             >
-              Clear All Filters
+              {translate('clearAllFilters')}
             </Button>
           )}
         </div>

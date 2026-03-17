@@ -3,14 +3,15 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/sonner'
 import Header from '@/components/header'
+import LanguageProvider from '@/components/language-provider'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Mosque Finder - Find Nearby Mosques & Prayer Times',
-  description: 'Discover mosques near you with accurate Jamat times, facilities info, and community verification. Add and verify mosques to help the community.',
+  title: 'Mosque Finder - কাছাকাছি মসজিদ ও জামাতের সময় খুঁজুন',
+  description: 'Mosque Finder এ কাছাকাছি মসজিদ, জামাতের সময়, সুবিধাসমূহ ও কমিউনিটি যাচাইকরণ তথ্য সহজে দেখুন।',
   keywords: ['mosque', 'masjid', 'prayer times', 'jamat times', 'salah', 'muslim', 'islamic'],
   icons: {
     icon: [
@@ -43,12 +44,14 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="bn">
       <body className="font-sans antialiased">
-        <div className="flex flex-col min-h-screen">
-          <Header />
-          <main className="flex-1">{children}</main>
-        </div>
+        <LanguageProvider>
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-1">{children}</main>
+          </div>
+        </LanguageProvider>
         <Toaster />
         <Analytics />
       </body>

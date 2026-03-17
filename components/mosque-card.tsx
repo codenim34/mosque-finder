@@ -7,6 +7,7 @@ import { timestampToTimeString } from '@/lib/time-utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { useLanguage } from '@/components/language-provider'
 import {
   MapPin,
   Clock,
@@ -26,6 +27,7 @@ interface MosqueCardProps {
 
 export default function MosqueCard({ mosque, showDistance }: MosqueCardProps) {
   const nextPrayer = getNextPrayerTime(mosque)
+  const { translate } = useLanguage()
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -41,7 +43,7 @@ export default function MosqueCard({ mosque, showDistance }: MosqueCardProps) {
             )}
             <Badge variant="secondary" className="shrink-0">
               <CheckCircle className="h-3 w-3 mr-1" />
-              {mosque.verificationCount}
+              {translate('verifiedCount', { count: mosque.verificationCount })}
             </Badge>
           </div>
         </div>
@@ -52,7 +54,7 @@ export default function MosqueCard({ mosque, showDistance }: MosqueCardProps) {
         {showDistance && mosque.distance && (
           <div className="flex items-center gap-1 text-sm text-primary">
             <Navigation className="h-3 w-3" />
-            <span>{(mosque.distance / 1000).toFixed(1)} km away</span>
+            <span>{translate('kmAway', { distance: (mosque.distance / 1000).toFixed(1) })}</span>
           </div>
         )}
       </CardHeader>
@@ -88,38 +90,38 @@ export default function MosqueCard({ mosque, showDistance }: MosqueCardProps) {
           {mosque.facilities.femaleArea && (
             <Badge variant="outline" className="text-xs">
               <Users className="h-3 w-3 mr-1" />
-              Female Area
+              {translate('femalePrayerArea')}
             </Badge>
           )}
           {mosque.facilities.parking && (
             <Badge variant="outline" className="text-xs">
               <Car className="h-3 w-3 mr-1" />
-              Parking
+              {translate('parkingAvailable')}
             </Badge>
           )}
           {mosque.facilities.wheelchairAccess && (
             <Badge variant="outline" className="text-xs">
               <Accessibility className="h-3 w-3 mr-1" />
-              Accessible
+              {translate('wheelchairAccessible')}
             </Badge>
           )}
           {mosque.facilities.wuduFacilities && (
             <Badge variant="outline" className="text-xs">
               <Droplets className="h-3 w-3 mr-1" />
-              Wudu
+              {translate('wuduFacilities')}
             </Badge>
           )}
           {mosque.facilities.airConditioned && (
             <Badge variant="outline" className="text-xs">
               <Wind className="h-3 w-3 mr-1" />
-              A/C
+              {translate('airConditioned')}
             </Badge>
           )}
         </div>
 
         <Link href={`/mosque/${mosque._id}`}>
           <Button className="w-full" size="sm">
-            View Details
+            {translate('viewDetails')}
           </Button>
         </Link>
       </CardContent>

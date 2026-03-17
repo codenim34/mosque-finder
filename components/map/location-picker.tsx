@@ -4,13 +4,13 @@ import { useState, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { MapPin, Crosshair, Search } from 'lucide-react'
+import { useLanguage } from '@/components/language-provider'
 
 const MosqueMap = dynamic(() => import('./mosque-map'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[300px] bg-muted animate-pulse rounded-lg flex items-center justify-center">
+    <div className="w-full h-75 bg-muted animate-pulse rounded-lg flex items-center justify-center">
       <MapPin className="h-8 w-8 text-muted-foreground" />
     </div>
   ),
@@ -25,6 +25,7 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
   const [searchQuery, setSearchQuery] = useState('')
   const [searching, setSearching] = useState(false)
   const [locating, setLocating] = useState(false)
+  const { translate } = useLanguage()
   
   // Create a stable key that only changes on initial mount
   const mapKey = useMemo(() => `picker-${Date.now()}`, [])
@@ -55,7 +56,7 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
 
   const handleLocateMe = () => {
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser')
+      alert(translate('geolocationUnsupported'))
       return
     }
 
@@ -70,7 +71,7 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
       },
       (error) => {
         console.error('Geolocation error:', error)
-        alert('Unable to get your location. Please enter it manually.')
+        alert(translate('geolocationFailed'))
         setLocating(false)
       }
     )
@@ -81,7 +82,7 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
       <div className="flex gap-2">
         <div className="flex-1">
           <Input
-            placeholder="Search for an address..."
+            placeholder={translate('searchAddressPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -105,7 +106,7 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
         </Button>
       </div>
 
-      <div className="h-[300px] rounded-lg overflow-hidden border">
+      <div className="h-75 rounded-lg overflow-hidden border">
         <MosqueMap
           key={mapKey}
           mosques={[]}
@@ -124,7 +125,7 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
       )}
 
       <p className="text-xs text-muted-foreground">
-        Click on the map to select location, search by address, or use your current location.
+        {translate('mapPickerHint')}
       </p>
     </div>
   )

@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "mongoose": "^8.5.1",
-    "react-leaflet": "^4.2.1",
     "leaflet": "^1.9.4",
     "swr": "^2.2.5",
     "@hookform/resolvers": "^3.9.1",

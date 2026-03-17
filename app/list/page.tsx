@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { MapPin, List, SortAsc, Loader2 } from 'lucide-react'
+import { useLanguage } from '@/components/language-provider'
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
@@ -28,6 +29,7 @@ export default function ListPage() {
   const [sortBy, setSortBy] = useState<SortOption>('nearest')
   const [locating, setLocating] = useState(false)
   const [filters, setFilters] = useState<PrayerFilters>({})
+  const { translate } = useLanguage()
 
   // Build API URL
   const apiUrl = userLocation
@@ -78,11 +80,9 @@ export default function ListPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Browse Mosques</h1>
-        <p className="text-muted-foreground">
-          Search and find mosques near you or in any location
-        </p>
+      <div className="mb-8 rounded-xl border bg-linear-to-br from-card via-card to-secondary/30 p-6 shadow-sm">
+        <h1 className="text-3xl font-bold mb-2">{translate('browseMosques')}</h1>
+        <p className="text-muted-foreground">{translate('browseSubtitle')}</p>
       </div>
 
       {/* Search Bar */}
@@ -91,42 +91,42 @@ export default function ListPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 rounded-xl border p-4 bg-card/80 backdrop-blur">
         <div className="flex items-center gap-2 flex-wrap">
           {locating ? (
             <Badge variant="outline" className="py-1">
               <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-              Finding location...
+              {translate('findingLocation')}
             </Badge>
           ) : userLocation ? (
             <Badge variant="secondary" className="py-1">
               <MapPin className="h-3 w-3 mr-1" />
-              Showing nearby mosques
+              {translate('showingNearby')}
             </Badge>
           ) : (
             <Badge variant="outline" className="py-1">
               <List className="h-3 w-3 mr-1" />
-              Showing all mosques
+              {translate('showingAll')}
             </Badge>
           )}
           {sortedMosques.length > 0 && (
             <span className="text-sm text-muted-foreground">
-              {sortedMosques.length} mosque{sortedMosques.length !== 1 ? 's' : ''} found
+              {translate('mosquesFound', { count: sortedMosques.length })}
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <PrayerFilter filters={filters} onFiltersChange={setFilters} />
           <SortAsc className="h-4 w-4 text-muted-foreground" />
           <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Sort by" />
+            <SelectTrigger className="w-full sm:w-40">
+              <SelectValue placeholder={translate('sortBy')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="nearest">Nearest First</SelectItem>
-              <SelectItem value="verified">Most Verified</SelectItem>
-              <SelectItem value="newest">Recently Added</SelectItem>
+              <SelectItem value="nearest">{translate('nearestFirst')}</SelectItem>
+              <SelectItem value="verified">{translate('mostVerified')}</SelectItem>
+              <SelectItem value="newest">{translate('recentlyAdded')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -146,8 +146,8 @@ export default function ListPage() {
         </div>
       ) : error ? (
         <div className="text-center py-12">
-          <p className="text-lg font-medium text-destructive">Failed to load mosques</p>
-          <p className="text-muted-foreground">Please try again later</p>
+          <p className="text-lg font-medium text-destructive">{translate('failedToLoadMosques')}</p>
+          <p className="text-muted-foreground">{translate('pleaseTryAgainLater')}</p>
         </div>
       ) : sortedMosques.length > 0 ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -162,14 +162,14 @@ export default function ListPage() {
       ) : (
         <div className="text-center py-12">
           <MapPin className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-          <h2 className="text-xl font-semibold mb-2">No Mosques Found</h2>
+          <h2 className="text-xl font-semibold mb-2">{translate('noMosquesFound')}</h2>
           <p className="text-muted-foreground mb-6">
             {userLocation
-              ? 'No mosques found near this location. Try a different search.'
-              : 'Be the first to add a mosque to help the community!'}
+              ? translate('noMosquesFoundNear')
+              : translate('beFirstCommunity')}
           </p>
           <Button asChild>
-            <a href="/add">Add a Mosque</a>
+            <a href="/add">{translate('addMosque')}</a>
           </Button>
         </div>
       )}
