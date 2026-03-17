@@ -42,3 +42,35 @@ export interface SearchParams {
   radius?: number
   query?: string
 }
+
+export interface MosqueUpdateData {
+  _id: string
+  mosqueId: string
+  jamatTimes?: Partial<JamatTimes>
+  facilities?: Partial<Facilities>
+  contactInfo?: {
+    address?: string
+    city?: string
+    country?: string
+    phone?: string | null
+    website?: string | null
+    description?: string | null
+  }
+  note?: string
+  status: 'pending' | 'approved' | 'rejected'
+  supportCount: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface MosqueFeedbackData {
+  _id: string
+  mosqueId: string
+  type: 'feedback' | 'suggestion' | 'problem'
+  message: string
+  anonymous: boolean
+  name?: string
+  contact?: string
+  createdAt: string
+  updatedAt: string
+}

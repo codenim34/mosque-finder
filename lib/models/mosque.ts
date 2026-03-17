@@ -12,8 +12,8 @@ export interface IJamatTimes {
 export interface IFacilities {
   femaleArea: boolean
   parking: boolean
-  wheelchair: boolean
-  wuduArea: boolean
+  wheelchairAccess: boolean
+  wuduFacilities: boolean
   airConditioned: boolean
 }
 
