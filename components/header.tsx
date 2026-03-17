@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { MapPin, Plus, List } from 'lucide-react'
@@ -22,8 +23,15 @@ export default function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-14 gap-2">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary-foreground/20 rounded-lg flex items-center justify-center ring-1 ring-primary-foreground/20">
-              <MapPin className="h-5 w-5 text-primary-foreground" />
+            <div className="w-8 h-8 bg-primary-foreground/10 rounded-lg flex items-center justify-center ring-1 ring-primary-foreground/20 overflow-hidden">
+              <Image
+                src="/logo.png"
+                alt="Mosque Finder"
+                width={32}
+                height={32}
+                className="h-full w-full object-cover"
+                priority
+              />
             </div>
             <span className="font-semibold text-lg text-primary-foreground hidden sm:block">{translate('appName')}</span>
           </Link>

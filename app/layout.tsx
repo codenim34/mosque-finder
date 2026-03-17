@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/sonner'
 import Header from '@/components/header'
 import LanguageProvider from '@/components/language-provider'
+import FeedbackFab from '@/components/feedback-fab'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -51,6 +52,7 @@ export default function RootLayout({
             <Header />
             <main className="flex-1">{children}</main>
           </div>
+          <FeedbackFab />
         </LanguageProvider>
         <Toaster />
         <Analytics />

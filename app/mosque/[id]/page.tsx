@@ -4,7 +4,7 @@ import { use, useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import useSWR, { mutate } from 'swr'
-import { MosqueData, MosqueFeedbackData, MosqueUpdateData } from '@/lib/types'
+import { MosqueData } from '@/lib/types'
 import { toast } from 'sonner'
 import { useLanguage } from '@/components/language-provider'
 import { timestampToTimeString } from '@/lib/time-utils'
@@ -17,13 +17,6 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import {
   MapPin,
   Clock,
@@ -61,7 +54,6 @@ export default function MosqueDetailPage({
   const { id } = use(params)
   const [verifying, setVerifying] = useState(false)
   const [submittingSuggestion, setSubmittingSuggestion] = useState(false)
-  const [submittingFeedback, setSubmittingFeedback] = useState(false)
   const [updateForm, setUpdateForm] = useState({
     jamatTimes: {
       fajr: '',
@@ -88,26 +80,10 @@ export default function MosqueDetailPage({
     },
     note: '',
   })
-  const [feedbackForm, setFeedbackForm] = useState({
-    type: 'feedback' as 'feedback' | 'suggestion' | 'problem',
-    anonymous: true,
-    name: '',
-    contact: '',
-    message: '',
-  })
-
   const { translate } = useLanguage()
 
   const { data: mosque, error, isLoading } = useSWR<MosqueData>(
     `/api/mosques/${id}`,
-    fetcher
-  )
-  const { data: pendingUpdates } = useSWR<MosqueUpdateData[]>(
-    `/api/mosques/${id}/updates`,
-    fetcher
-  )
-  const { data: recentFeedback } = useSWR<MosqueFeedbackData[]>(
-    `/api/mosques/${id}/feedback`,
     fetcher
   )
 
@@ -258,48 +234,11 @@ export default function MosqueDetailPage({
 
       toast.success(translate('updateAppliedInstant'))
       mutate(`/api/mosques/${id}`)
-      mutate(`/api/mosques/${id}/updates`)
     } catch (submitError) {
       console.error('Update submission error:', submitError)
       toast.error(translate('pleaseTryAgainLater'))
     } finally {
       setSubmittingSuggestion(false)
-    }
-  }
-
-  const handleSubmitFeedback = async () => {
-    if (!feedbackForm.message.trim()) {
-      toast.info(translate('feedbackMessage'))
-      return
-    }
-
-    setSubmittingFeedback(true)
-    try {
-      const response = await fetch(`/api/mosques/${id}/feedback`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(feedbackForm),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit feedback')
-      }
-
-      toast.success(translate('feedbackSubmitted'))
-      setFeedbackForm((prev) => ({
-        ...prev,
-        message: '',
-      }))
-      mutate(`/api/mosques/${id}/feedback`)
-    } catch (feedbackError) {
-      console.error('Feedback submit error:', feedbackError)
-      toast.error(translate('pleaseTryAgainLater'))
-    } finally {
-      setSubmittingFeedback(false)
     }
   }
 
@@ -651,168 +590,6 @@ export default function MosqueDetailPage({
               </CardContent>
             </Card>
           )}
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{translate('pendingUpdates')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-xs text-muted-foreground">{translate('instantUpdateHint')}</p>
-
-              {!pendingUpdates ? (
-                <p className="text-sm text-muted-foreground">{translate('loading')}</p>
-              ) : pendingUpdates.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{translate('noPendingUpdates')}</p>
-              ) : (
-                pendingUpdates.map((update) => (
-                  <div key={update._id} className="rounded-lg border p-3 space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <Badge variant="outline">
-                        {update.status === 'approved' ? translate('updateAppliedInstant') : translate('communitySupport')}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {translate('supportCount', { count: update.supportCount })}
-                      </span>
-                    </div>
-
-                    {update.note && (
-                      <p className="text-sm text-muted-foreground">{update.note}</p>
-                    )}
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{translate('feedbackTitle')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">{translate('feedbackDesc')}</p>
-
-              <div className="space-y-2">
-                <Label>{translate('feedbackType')}</Label>
-                <Select
-                  value={feedbackForm.type}
-                  onValueChange={(value) =>
-                    setFeedbackForm((prev) => ({
-                      ...prev,
-                      type: value as 'feedback' | 'suggestion' | 'problem',
-                    }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="feedback">{translate('feedbackTypeFeedback')}</SelectItem>
-                    <SelectItem value="suggestion">{translate('feedbackTypeSuggestion')}</SelectItem>
-                    <SelectItem value="problem">{translate('feedbackTypeProblem')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <label className="flex items-center gap-2 text-sm">
-                <Checkbox
-                  checked={feedbackForm.anonymous}
-                  onCheckedChange={(checked) =>
-                    setFeedbackForm((prev) => ({
-                      ...prev,
-                      anonymous: checked === true,
-                    }))
-                  }
-                />
-                <span>{translate('anonymous')}</span>
-              </label>
-
-              {!feedbackForm.anonymous && (
-                <div className="grid grid-cols-1 gap-2">
-                  <Input
-                    placeholder={translate('yourName')}
-                    value={feedbackForm.name}
-                    onChange={(event) =>
-                      setFeedbackForm((prev) => ({
-                        ...prev,
-                        name: event.target.value,
-                      }))
-                    }
-                  />
-                  <Input
-                    placeholder={translate('contactInfoLabel')}
-                    value={feedbackForm.contact}
-                    onChange={(event) =>
-                      setFeedbackForm((prev) => ({
-                        ...prev,
-                        contact: event.target.value,
-                      }))
-                    }
-                  />
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label>{translate('feedbackMessage')}</Label>
-                <Textarea
-                  placeholder={translate('feedbackMessagePlaceholder')}
-                  value={feedbackForm.message}
-                  onChange={(event) =>
-                    setFeedbackForm((prev) => ({
-                      ...prev,
-                      message: event.target.value,
-                    }))
-                  }
-                  rows={4}
-                />
-              </div>
-
-              <Button
-                onClick={handleSubmitFeedback}
-                disabled={submittingFeedback}
-                className="w-full"
-              >
-                {submittingFeedback ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    {translate('submittingFeedback')}
-                  </>
-                ) : (
-                  translate('submitFeedback')
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{translate('recentFeedback')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {!recentFeedback ? (
-                <p className="text-sm text-muted-foreground">{translate('loading')}</p>
-              ) : recentFeedback.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{translate('noPendingUpdates')}</p>
-              ) : (
-                recentFeedback.map((item) => (
-                  <div key={item._id} className="rounded-lg border p-3 space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <Badge variant="outline">
-                        {item.type === 'problem'
-                          ? translate('feedbackTypeProblem')
-                          : item.type === 'suggestion'
-                            ? translate('feedbackTypeSuggestion')
-                            : translate('feedbackTypeFeedback')}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {item.anonymous ? translate('anonymous') : item.name || translate('yourName')}
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{item.message}</p>
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>
