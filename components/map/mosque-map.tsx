@@ -42,8 +42,8 @@ export default function MosqueMap({
       }
 
       // Check if container already has a map (Leaflet adds _leaflet_id)
-      const container = mapContainerRef.current as HTMLElement & { _leaflet_id?: number }
-      if (container._leaflet_id) {
+      const container = mapContainerRef.current as HTMLElement & { _leaflet_id?: number } | null
+      if (container && container._leaflet_id) {
         setIsLoaded(true)
         return
       }
@@ -180,6 +180,12 @@ export default function MosqueMap({
           ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-xs">${(mosque.distance / 1000).toFixed(1)} km</span>` 
           : ''
 
+        // Format times from timestamps
+        const formatTime = (timestamp: number) => {
+          const date = new Date(timestamp)
+          return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+        }
+
         marker.bindPopup(`
           <div class="min-w-[200px] p-1">
             <h3 class="font-semibold text-base mb-1">${mosque.name}</h3>
@@ -191,8 +197,8 @@ export default function MosqueMap({
               ${distanceText}
             </div>
             <div class="text-xs mb-3">
-              <span class="font-medium">Fajr:</span> ${mosque.jamatTimes.fajr} | 
-              <span class="font-medium">Dhuhr:</span> ${mosque.jamatTimes.dhuhr}
+              <span class="font-medium">Fajr:</span> ${formatTime(mosque.jamatTimes.fajr)} | 
+              <span class="font-medium">Dhuhr:</span> ${formatTime(mosque.jamatTimes.dhuhr)}
             </div>
             <a href="/mosque/${mosque._id}" class="block w-full text-center bg-green-700 hover:bg-green-800 text-white py-1.5 px-3 rounded text-sm">
               View Details
