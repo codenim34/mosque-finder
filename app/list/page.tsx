@@ -57,21 +57,20 @@ export default function ListPage() {
     setUserLocation({ lat, lng })
   }
 
-  // Sort mosques
-  const sortedMosques = mosques
-    ? [...mosques].sort((a, b) => {
-        switch (sortBy) {
-          case 'nearest':
-            return (a.distance || Infinity) - (b.distance || Infinity)
-          case 'verified':
-            return b.verificationCount - a.verificationCount
-          case 'newest':
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          default:
-            return 0
-        }
-      })
-    : []
+  // Sort mosques - ensure mosques is an array
+  const mosquesArray = Array.isArray(mosques) ? mosques : []
+  const sortedMosques = mosquesArray.sort((a, b) => {
+    switch (sortBy) {
+      case 'nearest':
+        return (a.distance || Infinity) - (b.distance || Infinity)
+      case 'verified':
+        return b.verificationCount - a.verificationCount
+      case 'newest':
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      default:
+        return 0
+    }
+  })
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
@@ -106,9 +105,9 @@ export default function ListPage() {
               Showing all mosques
             </Badge>
           )}
-          {mosques && (
+          {mosquesArray.length > 0 && (
             <span className="text-sm text-muted-foreground">
-              {mosques.length} mosque{mosques.length !== 1 ? 's' : ''} found
+              {mosquesArray.length} mosque{mosquesArray.length !== 1 ? 's' : ''} found
             </span>
           )}
         </div>

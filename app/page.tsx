@@ -32,7 +32,10 @@ export default function HomePage() {
     ? `/api/mosques?lat=${userLocation[0]}&lng=${userLocation[1]}&radius=50000`
     : '/api/mosques'
 
-  const { data: mosques, error, isLoading } = useSWR<MosqueData[]>(apiUrl, fetcher)
+  const { data: mosquesData, error, isLoading } = useSWR<MosqueData[]>(apiUrl, fetcher)
+  
+  // Ensure mosques is always an array
+  const mosques = Array.isArray(mosquesData) ? mosquesData : []
 
   // Try to get user location on mount
   useEffect(() => {
@@ -82,7 +85,7 @@ export default function HomePage() {
                   <p className="text-sm text-muted-foreground">
                     {isLoading
                       ? 'Loading...'
-                      : `${mosques?.length || 0} mosques found`}
+                      : `${mosques.length} mosques found`}
                   </p>
                 </div>
                 <Button
@@ -111,7 +114,7 @@ export default function HomePage() {
                     <p>Failed to load mosques</p>
                     <p className="text-sm">Please try again later</p>
                   </div>
-                ) : mosques && mosques.length > 0 ? (
+                ) : mosques.length > 0 ? (
                   <div className="space-y-4">
                     {mosques.map((mosque) => (
                       <MosqueCard

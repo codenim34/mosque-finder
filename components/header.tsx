@@ -16,14 +16,14 @@ export default function Header() {
   ]
 
   return (
-    <header className="bg-card border-b sticky top-0 z-50">
+    <header className="bg-primary sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-14">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-primary-foreground/20 rounded-lg flex items-center justify-center">
               <MapPin className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-semibold text-lg hidden sm:block">Mosque Finder</span>
+            <span className="font-semibold text-lg text-primary-foreground hidden sm:block">Mosque Finder</span>
           </Link>
 
           <nav className="flex items-center gap-1">
@@ -33,11 +33,11 @@ export default function Header() {
               return (
                 <Link key={item.href} href={item.href}>
                   <Button
-                    variant={isActive ? 'secondary' : 'ghost'}
+                    variant="ghost"
                     size="sm"
                     className={cn(
-                      'gap-2',
-                      isActive && 'bg-primary/10 text-primary'
+                      'gap-2 text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10',
+                      isActive && 'bg-primary-foreground/20 text-primary-foreground'
                     )}
                   >
                     <Icon className="h-4 w-4" />
